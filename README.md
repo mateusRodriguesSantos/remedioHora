@@ -5,9 +5,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
 	<defs>
 		<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-			<stop offset="0%" style="stop-color:#2daee5;stop-opacity:1" />
-			<stop offset="50%" style="stop-color:#2d40e5;stop-opacity:1" />
-			<stop offset="100%" style="stop-color:#892de5;stop-opacity:1" />
+			<stop offset="0%" style="stop-color:#2d3ae5;stop-opacity:1" />
+			<stop offset="50%" style="stop-color:#8f2de5;stop-opacity:1" />
+			<stop offset="100%" style="stop-color:#e52dcd;stop-opacity:1" />
 		</linearGradient>
 		<filter id="shadow">
 			<feDropShadow dx="2.0" dy="2.0" stdDeviation="4.0" flood-opacity="0.5" />
