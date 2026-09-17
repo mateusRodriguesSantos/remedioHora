@@ -1,5 +1,5 @@
 //
-//  Item.swift
+//  Medicamento.swift
 //  remedioHora
 //
 //  Created by Mateus Rodrigues on 16/09/26.
@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Item {
+final class Medicamento {
     var timestamp: Date
     
     init(timestamp: Date) {

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/mateusrodrigues/Desktop/remedioHora.nosync/remedioHora/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Select an item",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 17
+        }
+      }
+    ]
+  },
+  "version": 1
+}

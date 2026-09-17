@@ -1,0 +1,12 @@
+{
+  "/Users/mateusrodrigues/Desktop/remedioHora.nosync/remedioHora/Repository/Item.swift" : {
+    "abi-baseline-json" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora.abi.json",
+    "const-values" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.swiftconstvalues",
+    "dependencies" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.d",
+    "diagnostics" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.dia",
+    "objc-header" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-Swift.h",
+    "swiftdoc" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora.swiftdoc",
+    "swiftmodule" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora.swiftmodule",
+    "swiftsourceinfo" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora.swiftsourceinfo"
+  }
+}
