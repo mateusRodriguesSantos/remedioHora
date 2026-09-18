@@ -7,14 +7,18 @@
 
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 struct RecordMedicamentoView: View {
     
     @EnvironmentObject var manager: RecordMedicamentoCoordinatorManager
     
     @Query private var medicamentos: [Medicamento]
-    @State var nome: String = String()
-    @State var dosagem: String = String()
+    
+    @State var imageSelection: PhotosPickerItem? = nil
+    @State private var showImagePicker: Bool = false
+    @State private var nome: String = String()
+    @State private var dosagem: String = String()
     @State private var date = Date()
     @State private var quantidadeDias: Int? = nil
     @State private var numberFormatter: NumberFormatter = {
@@ -22,11 +26,16 @@ struct RecordMedicamentoView: View {
         nf.numberStyle = .ordinal
         return nf
     }()
+    
+    
     var body: some View {
         VStack {
-            Button {
-                
-            } label: {
+            Text("Adicionar Medicamento")
+                .font(.title)
+                .padding(.vertical, 20)
+            PhotosPicker(selection: $imageSelection,
+                         matching: .images,
+                         photoLibrary: .shared()) {
                 VStack {
                     Image(systemName: "photo.circle.fill")
                         .resizable()
@@ -38,6 +47,7 @@ struct RecordMedicamentoView: View {
                 }
                 .padding(.top, 60)
             }
+            .buttonStyle(.borderless)
             Form {
                 Section {
                     TextField("Nome medicamento", text: $nome, prompt: Text("Nome medicamento"))
@@ -59,7 +69,7 @@ struct RecordMedicamentoView: View {
             }
             Spacer()
             Button {
-                //manager.navigate(to: .frequency)
+                manager.navigate(to: .frequency)
             } label: {
                 Text("Seguinte")
                     .padding(20)
@@ -68,10 +78,9 @@ struct RecordMedicamentoView: View {
                         RoundedRectangle(cornerRadius: 50, style: .continuous)
                             .fill(Color.yellow)
                     }
-                
+                    .padding(.bottom, 20)
             }
         }
-        .navigationTitle("Adicionar Medicamento")
     }
 }
 

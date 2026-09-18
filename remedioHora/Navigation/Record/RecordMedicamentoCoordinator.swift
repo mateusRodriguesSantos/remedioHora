@@ -27,7 +27,7 @@ struct RecordMedicamentoCoordinator: View {
                     case .data:
                         RecordMedicamentoView()
                     case .frequency:
-                        FrequencyMedicamentoView()
+                        RecordMedicamentoDosagemView()
                     case .notification:
                         EmptyView()
                     case .confimation:
