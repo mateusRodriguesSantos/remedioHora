@@ -6,10 +6,46 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MedicamentosListView: View {
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query var medicamentos: [Medicamento]
+    
     var body: some View {
-        Text("Lista de medicamentos")
+        VStack {
+            Text("Medicamentos")
+                .font(.title)
+            if !medicamentos.isEmpty {
+                List {
+                    ForEach(Binding.constant(medicamentos), editActions: [.delete]) { medicamento in
+                        VStack {
+                            HStack {
+                                Image(systemName: "person")
+                                Text(medicamento.wrappedValue.nome)
+                            }
+                        }
+                    }
+                    .onDelete(perform: deleteItems)
+                }
+                .toolbar {
+                    EditButton()
+                }
+            } else {
+                Text("Sem medicamentos cadastrados!")
+                    .font(.caption2)
+                    .padding(.top, 120)
+                Spacer()
+            }
+        }
+    }
+    
+    private func deleteItems(at offsets: IndexSet) {
+        for index in offsets {
+            let itemToDelete = medicamentos[index]
+            modelContext.delete(itemToDelete)
+        }
     }
 }
 

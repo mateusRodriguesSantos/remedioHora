@@ -49,6 +49,9 @@ struct RecordMedicamentoCoordinator: View {
         .onDisappear {
             manager.returnToInit = false
         }
+        .onAppear {
+            manager.reset()
+        }
     }
 }
 

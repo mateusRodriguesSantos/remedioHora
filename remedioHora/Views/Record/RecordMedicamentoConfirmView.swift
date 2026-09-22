@@ -35,7 +35,6 @@ struct RecordMedicamentoConfirmView: View {
             Spacer()
             Button {
                 manager.dismiss()
-                manager.reset()
             } label: {
                 Text("Tela Inicial")
                     .padding(20)
