@@ -25,7 +25,6 @@ enum DoseInterval: CaseIterable, Identifiable {
     
     var id: String { String(describing: self) }
     
-    // Portuguese label used in UI
     var label: String {
         switch self {
         case .every15Minutes: return "A cada 15 minutos"
@@ -45,7 +44,6 @@ enum DoseInterval: CaseIterable, Identifiable {
         }
     }
     
-    // Useful for scheduling (Calendar.date(byAdding:components:to:))
     var components: DateComponents {
         switch self {
         case .every15Minutes: return DateComponents(minute: 15)
@@ -57,12 +55,21 @@ enum DoseInterval: CaseIterable, Identifiable {
         case .every6Hours:    return DateComponents(hour: 6)
         case .every8Hours:    return DateComponents(hour: 8)
         case .every12Hours:   return DateComponents(hour: 12)
-        case .every24Hours:   return DateComponents(day: 1) // 24h -> 1 day
+        case .every24Hours:   return DateComponents(day: 1)
         case .every2Days:     return DateComponents(day: 2)
         case .every1Week:     return DateComponents(weekOfYear: 1)
         case .every15Days:    return DateComponents(day: 15)
         case .every1Month:    return DateComponents(month: 1)
         }
+    }
+    
+    static func verify(dose: String) -> DoseInterval? {
+        for inteval in DoseInterval.allCases {
+            if dose == inteval.label {
+                return inteval
+            }
+        }
+        return nil
     }
     
     static var allCases: [DoseInterval] {

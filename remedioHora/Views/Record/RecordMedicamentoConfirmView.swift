@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NotificationCenter
 
 struct RecordMedicamentoConfirmView: View {
     
