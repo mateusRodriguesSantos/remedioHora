@@ -40,6 +40,14 @@ struct ContentView: View {
                 Image(systemName: "plus.circle.fill")
             }
         }
+        .task {
+            let center = UNUserNotificationCenter.current()
+            do {
+                try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            } catch {
+                // Handle the error here.
+            }
+        }
     }
 }
 
