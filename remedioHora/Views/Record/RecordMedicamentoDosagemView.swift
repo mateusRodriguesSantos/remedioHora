@@ -6,10 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RecordMedicamentoDosagemView: View {
     
     @EnvironmentObject var manager: RecordMedicamentoCoordinatorManager
+    @Environment(\.modelContext) var modelContext: ModelContext
+    
+    @State private var doseSeleted: DoseInterval = .every15Minutes
+    var medicamentoToSave: Medicamento
+    
+    init(medicamentoToSave: Medicamento) {
+        self.medicamentoToSave = medicamentoToSave
+    }
     
     var body: some View {
         VStack {
@@ -17,16 +26,25 @@ struct RecordMedicamentoDosagemView: View {
                 Section("Intervalos") {
                     ForEach(DoseInterval.allCases) { interval in
                         Button {
-                   
+                            doseSeleted = interval
+                            medicamentoToSave.dosagem = interval.label
                         } label: {
-                            Text(interval.label)
-                                .foregroundStyle(.black)
-                                .font(.callout)
+                            HStack {
+                                Text(interval.label)
+                                    .foregroundStyle(.black)
+                                    .font(.callout)
+                                Spacer()
+                                if doseSeleted.label == interval.label {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.black)
+                                }
+                            }
                         }
                     }
                 }
                 Section {
                     Button {
+                        modelContext.insert(medicamentoToSave)
                         manager.navigate(to: .confimation)
                     } label: {
                         Text("Salvar")
@@ -41,14 +59,12 @@ struct RecordMedicamentoDosagemView: View {
                 }
                 .listRowBackground(Color.clear)
             }
-           
-       
         }
         .navigationTitle("Intevalo Dose")
     }
 }
 
 #Preview {
-    RecordMedicamentoDosagemView()
+    RecordMedicamentoDosagemView(medicamentoToSave: Medicamento(nome: "", dosagem: "", quantidadeDias: 0, timestamp: Date(), foto: Data()))
         .environmentObject(RecordMedicamentoCoordinatorManager())
 }

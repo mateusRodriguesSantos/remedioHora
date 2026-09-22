@@ -10,14 +10,21 @@ import SwiftData
 
 enum StepsRecord: Hashable {
     case data
-    case frequency
+    case frequency(medicamentoToSave: Medicamento)
     case notification
     case confimation
 }
 
 struct RecordMedicamentoCoordinator: View {
 
-    @StateObject var manager: RecordMedicamentoCoordinatorManager = RecordMedicamentoCoordinatorManager()
+    @StateObject var manager: RecordMedicamentoCoordinatorManager
+    @Binding var selectionFromTabBar: Tabs
+    
+    init(selectionFromTabBar: Binding<Tabs>) {
+        self._selectionFromTabBar = selectionFromTabBar
+        self._manager = StateObject(wrappedValue: RecordMedicamentoCoordinatorManager())
+        
+    }
     
     var body: some View {
         NavigationStack(path: $manager.path) {
@@ -26,19 +33,25 @@ struct RecordMedicamentoCoordinator: View {
                     switch destination {
                     case .data:
                         RecordMedicamentoView()
-                    case .frequency:
-                        RecordMedicamentoDosagemView()
+                    case .frequency(let medicamento):
+                        RecordMedicamentoDosagemView(medicamentoToSave: medicamento)
                     case .notification:
                         EmptyView()
                     case .confimation:
-                        EmptyView()
+                        RecordMedicamentoConfirmView()
                     }
                 }
         }
         .environmentObject(manager)
+        .onChange(of: manager.returnToInit) {
+            self.$selectionFromTabBar.wrappedValue = .programacao
+        }
+        .onDisappear {
+            manager.returnToInit = false
+        }
     }
 }
 
 #Preview {
-    RecordMedicamentoCoordinator()
+    RecordMedicamentoCoordinator(selectionFromTabBar: .constant(.gravar))
 }

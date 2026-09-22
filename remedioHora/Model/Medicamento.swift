@@ -7,12 +7,23 @@
 
 import Foundation
 import SwiftData
+import UIKit
 
 @Model
 final class Medicamento {
+    var id: String
+    var nome: String
+    var dosagem: String
+    var quantidadeDias: Int
     var timestamp: Date
+    var foto: Data
     
-    init(timestamp: Date) {
+    init(id: String = UUID().uuidString, nome: String, dosagem: String, quantidadeDias: Int, timestamp: Date, foto: Data) {
+        self.id = id
+        self.nome = nome
+        self.dosagem = dosagem
+        self.quantidadeDias = quantidadeDias
         self.timestamp = timestamp
+        self.foto = foto
     }
 }

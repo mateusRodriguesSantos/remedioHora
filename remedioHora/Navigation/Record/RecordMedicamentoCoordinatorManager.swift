@@ -9,7 +9,12 @@ import SwiftUI
 import Combine
 
 class RecordMedicamentoCoordinatorManager: ObservableObject {
-    @Published var path = NavigationPath()
+    @Published var path: NavigationPath
+    @Published var returnToInit: Bool = false
+    
+    init(path: NavigationPath = NavigationPath()) {
+        self.path = path
+    }
     
     func navigate(to route: StepsRecord) {
         path.append(route)
@@ -23,5 +28,9 @@ class RecordMedicamentoCoordinatorManager: ObservableObject {
     
     func reset() {
         path = NavigationPath()
+    }
+    
+    func dismiss() {
+        returnToInit = true
     }
 }

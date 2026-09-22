@@ -13,8 +13,6 @@ struct RecordMedicamentoView: View {
     
     @EnvironmentObject var manager: RecordMedicamentoCoordinatorManager
     
-    @Query private var medicamentos: [Medicamento]
-    
     @State var imageSelection: PhotosPickerItem? = nil
     @State private var showImagePicker: Bool = false
     @State private var nome: String = String()
@@ -66,19 +64,23 @@ struct RecordMedicamentoView: View {
                             .keyboardType(.numberPad)
                     }
                 }
-            }
-            Spacer()
-            Button {
-                manager.navigate(to: .frequency)
-            } label: {
-                Text("Seguinte")
-                    .padding(20)
-                    .foregroundStyle(Color.black)
-                    .background {
-                        RoundedRectangle(cornerRadius: 50, style: .continuous)
-                            .fill(Color.yellow)
+                Section {
+                    Button {
+                        let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: date, foto: Data())
+                        manager.navigate(to: .frequency(medicamentoToSave: medicamento))
+                    } label: {
+                        Text("Seguinte")
+                            .padding(20)
+                            .foregroundStyle(Color.black)
+                            .background {
+                                RoundedRectangle(cornerRadius: 50, style: .continuous)
+                                    .fill(Color.yellow)
+                            }
+                            .padding(.bottom, 20)
                     }
-                    .padding(.bottom, 20)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowBackground(Color.clear)
+                }
             }
         }
     }
@@ -86,5 +88,4 @@ struct RecordMedicamentoView: View {
 
 #Preview {
     RecordMedicamentoView()
-        .modelContainer(for: Medicamento.self, inMemory: true)
 }

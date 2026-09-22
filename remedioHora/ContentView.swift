@@ -8,31 +8,37 @@
 import SwiftUI
 import SwiftData
 
+enum Tabs: Hashable, Equatable {
+    case programacao
+    case medicamentos
+    case gravar
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var medicamentos: [Medicamento]
     @State private var showModal: Bool = false
+    @State private var selection: Tabs = .programacao
     
     var body: some View {
-        TabView {
-            Tab {
+        TabView(selection: $selection) {
+            Tab(value: .programacao) {
                 ScheduleCoordinator()
             } label: {
                 Image(systemName: "list.bullet.clipboard.fill")
                 Text("Programação")
             }
-            Tab {
+            Tab(value: .medicamentos) {
                 MedicamentosListCoordinator()
             } label: {
                 Image(systemName: "pill.fill")
                 Text("Medicamentos")
             }
-            Tab(role: .search) {
-                RecordMedicamentoCoordinator()
+            Tab(value: .gravar, role: .search) {
+                RecordMedicamentoCoordinator(selectionFromTabBar: $selection)
             } label: {
                 Image(systemName: "plus.circle.fill")
             }
-            
         }
     }
 }
