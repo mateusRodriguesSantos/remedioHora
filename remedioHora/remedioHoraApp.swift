@@ -8,6 +8,14 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+import Combine
+
+class SharedInformation: ObservableObject {
+    
+    static let shared: SharedInformation = SharedInformation()
+    
+    @Published var resetScheduleView: Bool = false
+}
 
 @MainActor
 var sharedModelContainer: ModelContainer = {
@@ -32,6 +40,7 @@ struct remedioHoraApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        .environmentObject(SharedInformation.shared)
     }
 }
 
@@ -51,6 +60,8 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         case medicamentoNotFound
         case intervalNotFound
     }
+    
+    
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let title = notification.request.content.title
@@ -75,7 +86,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                             createNotification(nameMedicine: medicamento.nome, dateComponents: newDateComp)
                             
                             try sharedModelContainer.mainContext.save()
-                            
+                            SharedInformation.shared.resetScheduleView = true
                         } else {
                             
                             let calendar = Calendar(identifier: .gregorian)
@@ -85,6 +96,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                             createNotification(nameMedicine: medicamento.nome, dateComponents: newDateComp)
                             
                             try sharedModelContainer.mainContext.save()
+                            SharedInformation.shared.resetScheduleView = true
                         }
                     } else {
                         throw Errors.intervalNotFound
