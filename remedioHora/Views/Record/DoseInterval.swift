@@ -63,6 +63,39 @@ enum DoseInterval: CaseIterable, Identifiable {
         }
     }
     
+    var seconds: Int {
+        switch self {
+        case .every15Minutes:
+            return 15 * 60
+        case .every30Minutes:
+            return 30 * 60
+        case .every1Hour:
+            return 1 * 60 * 60
+        case .every2Hours:
+            return 2 * 60 * 60
+        case .every3Hours:
+            return 3 * 60 * 60
+        case .every4Hours:
+            return 4 * 60 * 60
+        case .every6Hours:
+            return 6 * 60 * 60
+        case .every8Hours:
+            return 8 * 60 * 60
+        case .every12Hours:
+            return 12 * 60 * 60
+        case .every24Hours:
+            return 24 * 60 * 60
+        case .every2Days:
+            return 2 * 24 * 60 * 60
+        case .every1Week:
+            return 7 * 24 * 60 * 60
+        case .every15Days:
+            return 15 * 24 * 60 * 60
+        case .every1Month:
+            return 30 * 24 * 60 * 60
+        }
+    }
+    
     static func verify(dose: String) -> DoseInterval? {
         for inteval in DoseInterval.allCases {
             if dose == inteval.label {

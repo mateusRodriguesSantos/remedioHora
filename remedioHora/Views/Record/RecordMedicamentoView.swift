@@ -66,7 +66,7 @@ struct RecordMedicamentoView: View {
                 }
                 Section {
                     Button {
-                        let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: date, foto: Data())
+                        let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: date, foto: Data(), intervalo: DoseInterval.every15Minutes.label)
                         manager.navigate(to: .frequency(medicamentoToSave: medicamento))
                     } label: {
                         Text("Seguinte")

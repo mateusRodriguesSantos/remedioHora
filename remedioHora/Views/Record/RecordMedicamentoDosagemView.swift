@@ -13,8 +13,10 @@ struct RecordMedicamentoDosagemView: View {
     @EnvironmentObject var manager: RecordMedicamentoCoordinatorManager
     @Environment(\.modelContext) var modelContext: ModelContext
     
-    @State private var doseSeleted: DoseInterval = .every15Minutes
+    @State private var intervalSeleted: DoseInterval = .every15Minutes
     var medicamentoToSave: Medicamento
+    
+    @State private var showAlert: Bool = false
     
     init(medicamentoToSave: Medicamento) {
         self.medicamentoToSave = medicamentoToSave
@@ -26,15 +28,15 @@ struct RecordMedicamentoDosagemView: View {
                 Section("Intervalos") {
                     ForEach(DoseInterval.allCases) { interval in
                         Button {
-                            doseSeleted = interval
-                            medicamentoToSave.dosagem = interval.label
+                            intervalSeleted = interval
+                            medicamentoToSave.intervalo = interval.label
                         } label: {
                             HStack {
                                 Text(interval.label)
                                     .foregroundStyle(.black)
                                     .font(.callout)
                                 Spacer()
-                                if doseSeleted.label == interval.label {
+                                if intervalSeleted.label == interval.label {
                                     Image(systemName: "checkmark")
                                         .foregroundStyle(.black)
                                 }
@@ -44,9 +46,8 @@ struct RecordMedicamentoDosagemView: View {
                 }
                 Section {
                     Button {
-                        modelContext.insert(medicamentoToSave)
-                        saveNotification(nameMedicine: medicamentoToSave.nome, dose: medicamentoToSave.dosagem, date: medicamentoToSave.timestamp)
-                        manager.navigate(to: .confimation)
+                        saveNotification(nameMedicine: medicamentoToSave.nome, interval: intervalSeleted.label, date: medicamentoToSave.timestamp)
+                        
                     } label: {
                         Text("Salvar")
                             .padding(20)
@@ -62,39 +63,63 @@ struct RecordMedicamentoDosagemView: View {
             }
         }
         .navigationTitle("Intevalo Dose")
-    }
-    
-    private func saveNotification(nameMedicine: String, dose: String, date: Date) {
-        let contentNotification = UNMutableNotificationContent()
-        let content = UNMutableNotificationContent()
-        content.title = NSString.localizedUserNotificationString(forKey: nameMedicine, arguments: nil)
-        content.body = NSString.localizedUserNotificationString(forKey: "Hora de tomar seu remédio, lembre-se: \(dose)_", arguments: nil)
-        content.sound = UNNotificationSound.defaultCritical
-        
-        let calendar = Calendar(identifier: .gregorian)
-        let dateComponents = calendar.dateComponents(in: .current, from: date)
-        guard var day = dateComponents.day else { return }
-        
-        if let doseEnum = DoseInterval.verify(dose: dose) {
-            if let newDate = calendar.date(byAdding: doseEnum.components, to: date) {
-                let newDateComponents = calendar.dateComponents(in: .current, from: newDate)
-                let trigger = UNCalendarNotificationTrigger(dateMatching: newDateComponents, repeats: true)
-                
-                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-                
-                UNUserNotificationCenter.current().add(request) { error in
-                    if error == nil {
-                        print("Notification saved!!!")
-                    } else {
-                        dump(error.unsafelyUnwrapped)
-                    }
+        .alert("Error", isPresented: $showAlert) {
+            VStack {
+                Text("Error ao criar notificação!")
+                Button("Fechar") {
+                    showAlert = false
                 }
             }
         }
     }
+    
+    private func saveNotification(nameMedicine: String, interval: String, date: Date) {
+        if let doseEnum = DoseInterval.verify(dose: interval) {
+            let calendar = Calendar(identifier: .gregorian)
+            let initialDateComp = calendar.dateComponents(in: .current, from: date)
+  
+            switch date.compare(Date()) {
+            case .orderedAscending, .orderedSame:
+                let newDate = calendar.date(byAdding: doseEnum.components, to: date)
+                let newDateComp = calendar.dateComponents(in: .current, from: newDate ?? Date())
+                medicamentoToSave.nextDate = newDateComp.date
+                createNotification(nameMedicine: nameMedicine, dateComponents: newDateComp)
+            case .orderedDescending:
+                createNotification(nameMedicine: nameMedicine, dateComponents: initialDateComp)
+            }
+            
+            modelContext.insert(medicamentoToSave)
+            manager.navigate(to: .confimation)
+        } else {
+           showAlert = true
+        }
+    }
+    
+    private func createNotification(nameMedicine: String, dateComponents: DateComponents) {
+        let content = UNMutableNotificationContent()
+        content.title = NSString.localizedUserNotificationString(forKey: nameMedicine, arguments: nil)
+        content.body = NSString.localizedUserNotificationString(forKey: "Hora de tomar seu remédio!!!", arguments: nil)
+        
+        content.sound = UNNotificationSound.defaultCritical
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        
+        content.userInfo = ["horaData":"\(dateComponents.day ?? 0)/\(dateComponents.month ?? 0)/\(dateComponents.year ?? 0) - \(dateComponents.hour ?? 0):\(dateComponents.minute ?? 0)"]
+        //content.userInfo = ["horaData":"\(dateComponents.hour ?? 0):\(dateComponents.minute ?? 0)"]
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if error == nil {
+                print("Notification saved!!!")
+            } else {
+                dump(error.unsafelyUnwrapped)
+            }
+        }
+        
+    }
 }
 
 #Preview {
-    RecordMedicamentoDosagemView(medicamentoToSave: Medicamento(nome: "", dosagem: "", quantidadeDias: 0, timestamp: Date(), foto: Data()))
+    RecordMedicamentoDosagemView(medicamentoToSave: Medicamento(nome: "", dosagem: "", quantidadeDias: 0, timestamp: Date(), foto: Data(), intervalo: ""))
         .environmentObject(RecordMedicamentoCoordinatorManager())
 }

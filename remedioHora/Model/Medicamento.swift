@@ -17,13 +17,16 @@ final class Medicamento {
     var quantidadeDias: Int
     var timestamp: Date
     var foto: Data
+    var intervalo: String
+    var nextDate: Date?
     
-    init(id: String = UUID().uuidString, nome: String, dosagem: String, quantidadeDias: Int, timestamp: Date, foto: Data) {
+    init(id: String = UUID().uuidString, nome: String, dosagem: String, quantidadeDias: Int, timestamp: Date, foto: Data, intervalo: String) {
         self.id = id
         self.nome = nome
         self.dosagem = dosagem
         self.quantidadeDias = quantidadeDias
         self.timestamp = timestamp
         self.foto = foto
+        self.intervalo = intervalo
     }
 }
