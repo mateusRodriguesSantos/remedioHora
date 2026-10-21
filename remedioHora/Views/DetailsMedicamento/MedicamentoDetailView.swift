@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MedicamentoDetailView: View {
     
     @EnvironmentObject var manager: MedicamentosListCoordinatorManager
     
     @StateObject var viewModel: MedicamentoDetailViewModel
+    
+    @Environment(\.modelContext) var modelContext: ModelContext
+    
     
     init(viewModel: MedicamentoDetailViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -59,22 +63,26 @@ struct MedicamentoDetailView: View {
                 }
                 Section {
                     Button(role: .destructive) {
-                        
+                        Task {
+                            let idNotification = await UNUserNotificationCenter.current().pendingNotificationRequests().first { request in
+                                return request.content.title == viewModel.medicamento.nome
+                            }?.identifier ?? ""
+                            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [idNotification])
+                            modelContext.delete(viewModel.medicamento)
+                        }
                     }
                 }
             }
         }
-
-        .toolbar {
-            ToolbarItem {
-                Button {
-                    
-                } label: {
-                    Text("Editar")
-                }
-
-            }
-        }
+//        .toolbar {
+//            ToolbarItem {
+//                Button {
+//                    viewModel.editionMode = true
+//                } label: {
+//                    Text("Editar")
+//                }
+//            }
+//        }
     }
 }
 

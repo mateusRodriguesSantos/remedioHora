@@ -12,7 +12,7 @@ class MedicamentoDetailViewModel: ObservableObject {
  
     let medicamento: Medicamento
     let dateFormatter: DateFormatter = DateFormatter()
-    
+    @Published var editionMode: Bool = false
     
     init(medicamento: Medicamento) {
         self.medicamento = medicamento
