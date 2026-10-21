@@ -20,7 +20,7 @@ struct MedicamentosListView: View {
                 .font(.title)
             if !medicamentos.isEmpty {
                 List {
-                    ForEach(Binding.constant(medicamentos), editActions: [.delete]) { medicamento in
+                    ForEach(Binding.constant(medicamentos)/*, editActions: [.delete]*/) { medicamento in
                         VStack {
                             Button {
                                 manager.navigate(to: .detailView(medicamento: medicamento.wrappedValue))
@@ -32,11 +32,11 @@ struct MedicamentosListView: View {
                             }
                         }
                     }
-                    .onDelete(perform: deleteItems)
+                   // .onDelete(perform: deleteItems)
                 }
-                .toolbar {
-                    EditButton()
-                }
+//                .toolbar {
+//                    EditButton()
+//                }
             } else {
                 Text("Sem medicamentos cadastrados!")
                     .font(.caption2)
