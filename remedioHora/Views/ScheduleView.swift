@@ -12,7 +12,7 @@ import UserNotifications
 struct ScheduleView: View {
     
     @EnvironmentObject var sharedInfo: SharedInformation
-    @State var notifications: [(identifier: String, title: String, horaData: String)] = []
+    @State var notifications: [(identifier: String, title: String, previsao: String)] = []
     @State var showLoading: Bool = false
     
     var body: some View {
@@ -29,9 +29,9 @@ struct ScheduleView: View {
                 } else {
                     List {
                         ForEach(notifications, id: \.identifier) { notification in
-                            VStack {
+                            VStack(alignment: .leading) {
                                 Text(notification.title)
-                                Text(notification.horaData)
+                                Text("Previsão: \(notification.previsao)")
                             }
                         }
                     }
@@ -55,35 +55,70 @@ struct ScheduleView: View {
     }
     
     private func notificationCountability() async {
-        showLoading = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        await MainActor.run {
+            showLoading = true
+        }
+
+        defer {
+            Task { @MainActor in
+                showLoading = false
+            }
+        }
+
+        let center = UNUserNotificationCenter.current()
+
+        let delivered = await center.deliveredNotifications()
+
+        for notification in delivered {
+            print("ENTREGUE")
+            print("ID:", notification.request.identifier)
+            print("Título:", notification.request.content.title)
+            print("Body:", notification.request.content.body)
+            print("Trigger:", notification.request.trigger.debugDescription)
+        }
+
+        let requests = await center.pendingNotificationRequests()
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+        formatter.timeZone = .current
+
+        var result: [(String, String, previsao: String)] = []
+
+        for request in requests {
+            guard let trigger = request.trigger
+                    as? UNTimeIntervalNotificationTrigger else {
+                continue
+            }
+
+            print("ID:", request.identifier)
+            print("Intervalo:", trigger.timeInterval)
+            print("Marcacao:", request.content.userInfo["Horario da marcacao"] ?? "")
+
+            if let data = trigger.nextTriggerDate() {
+                //let dateString = formatter.string(from: data)
+                
+                print("Previsao \(formatter.string(from: data))")
+                let calendar = Calendar.current.dateComponents([.day, .month, .year, .hour, .minute, .second], from: Date(), to: data)
+          
+                result.append((
+                    request.identifier,
+                    request.content.title,
+                    previsao: "\(trigger.nextTriggerDate())"
+                ))
+            }
+        }
+
+        await MainActor.run {
+            notifications = result
+        }
+
+        // Mantém o loading visível por pelo menos 1 segundo.
+        try? await Task.sleep(for: .seconds(1))
+
+        await MainActor.run {
             showLoading = false
         }
-        DispatchQueue.main.async {
-        UNUserNotificationCenter.current()
-            .getDeliveredNotifications { notifications in
-                for notification in notifications {
-                    print("ENTREGUE")
-                    print("ID:", notification.request.identifier)
-                    print("Título:", notification.request.content.title)
-                    print("Body:", notification.request.content.body)
-                    print("Quando:", notification.request.trigger.debugDescription)
-                }
-            }
-     
-            UNUserNotificationCenter.current()
-                .getPendingNotificationRequests { notifications in
-                    for notification in notifications {
-                        print("PENDENTE")
-                        print("ID:", notification.identifier)
-                        print("Título:", notification.content.title)
-                        print("Body:", notification.content.body)
-                        print("Quando:", notification.trigger.debugDescription)
-                    }
-                }
-        }
-        let requests = await UNUserNotificationCenter.current().pendingNotificationRequests()
-        notifications = requests.map { ($0.identifier, $0.content.title, $0.content.userInfo["horaData"] as? String ?? "") }
     }
 }
 

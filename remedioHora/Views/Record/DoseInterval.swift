@@ -123,4 +123,19 @@ enum DoseInterval: CaseIterable, Identifiable {
             .every1Month
         ]
     }
+    
+    var targetNotificationCount: Int {
+            switch self {
+            case .every15Minutes, .every30Minutes, .every1Hour, .every2Hours, .every3Hours, .every4Hours, .every6Hours, .every8Hours, .every12Hours:
+                return 20
+            case .every24Hours, .every2Days:
+                return 20
+            case .every1Week:
+                return 12
+            case .every15Days:
+                return 6
+            case .every1Month:
+                return 6
+            }
+        }
 }

@@ -45,7 +45,7 @@ struct ContentView: View {
             do {
                 try await center.requestAuthorization(options: [.alert, .sound, .badge])
             } catch {
-                // Handle the error here.
+                dump(error)
             }
         }
     }

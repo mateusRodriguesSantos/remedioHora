@@ -18,9 +18,19 @@ final class Medicamento {
     var timestamp: Date
     var foto: Data
     var intervalo: String
-    var nextDate: Date?
+    var nextDates: [Date]?
+    var startTriggerDate: Date?
+    var qtdDoses: Int?
     
-    init(id: String = UUID().uuidString, nome: String, dosagem: String, quantidadeDias: Int, timestamp: Date, foto: Data, intervalo: String) {
+    init(
+        id: String = UUID().uuidString,
+        nome: String,
+        dosagem: String,
+        quantidadeDias: Int,
+        timestamp: Date,
+        foto: Data,
+        intervalo: String
+    ) {
         self.id = id
         self.nome = nome
         self.dosagem = dosagem

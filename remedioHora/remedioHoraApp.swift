@@ -61,117 +61,36 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         case intervalNotFound
     }
     
-    
-    
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        let title = notification.request.content.title
-        let descriptor = FetchDescriptor<Medicamento>(
-            predicate: #Predicate { $0.nome == title },
-            sortBy: [
-                .init(\.id)
-            ]
-        )
-        
-        do {
-            let result = try sharedModelContainer.mainContext.fetch(descriptor)
-            if result.count == 1 {
-                if let medicamento = result.first {
-                    if let enumInterval = DoseInterval.verify(dose: medicamento.intervalo) {
-                        if let nextDate = medicamento.nextDate {
-                            
-                            let calendar = Calendar(identifier: .gregorian)
-                            let newDate = calendar.date(byAdding: enumInterval.components, to: nextDate)
-                            let newDateComp = calendar.dateComponents(in: .current, from: newDate ?? Date())
-                            medicamento.nextDate = newDateComp.date
-                            createNotification(nameMedicine: medicamento.nome, dateComponents: newDateComp)
-                            
-                            try sharedModelContainer.mainContext.save()
-                            SharedInformation.shared.resetScheduleView = true
-                        } else {
-                            
-                            let calendar = Calendar(identifier: .gregorian)
-                            let newDate = calendar.date(byAdding: enumInterval.components, to: medicamento.timestamp)
-                            let newDateComp = calendar.dateComponents(in: .current, from: newDate ?? Date())
-                            medicamento.nextDate = newDateComp.date
-                            createNotification(nameMedicine: medicamento.nome, dateComponents: newDateComp)
-                            
-                            try sharedModelContainer.mainContext.save()
-                            SharedInformation.shared.resetScheduleView = true
-                        }
-                    } else {
-                        throw Errors.intervalNotFound
-                    }
-                } else {
-                    throw Errors.medicamentoNotFound
-                }
-            } else {
-                throw Errors.fetchUnsuccessful
-            }
-        } catch {
-            dump(error)
-        }
+        SharedInformation.shared.resetScheduleView = true
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        let title = response.notification.request.content.title
-        let descriptor = FetchDescriptor<Medicamento>(
-            predicate: #Predicate { $0.nome == title },
-            sortBy: [
-                .init(\.id)
-            ]
-        )
-        
-        do {
-            let result = try sharedModelContainer.mainContext.fetch(descriptor)
-            if result.count == 1 {
-                if let medicamento = result.first {
-                    if let enumInterval = DoseInterval.verify(dose: medicamento.intervalo) {
-                        if let nextDate = medicamento.nextDate {
-                            
-                            let calendar = Calendar(identifier: .gregorian)
-                            let newDate = calendar.date(byAdding: enumInterval.components, to: nextDate)
-                            let newDateComp = calendar.dateComponents(in: .current, from: newDate ?? Date())
-                            medicamento.nextDate = newDateComp.date
-                            createNotification(nameMedicine: medicamento.nome, dateComponents: newDateComp)
-                            
-                            try sharedModelContainer.mainContext.save()
-                            
-                        } else {
-                            
-                            let calendar = Calendar(identifier: .gregorian)
-                            let newDate = calendar.date(byAdding: enumInterval.components, to: medicamento.timestamp)
-                            let newDateComp = calendar.dateComponents(in: .current, from: newDate ?? Date())
-                            medicamento.nextDate = newDateComp.date
-                            createNotification(nameMedicine: medicamento.nome, dateComponents: newDateComp)
-                            
-                            try sharedModelContainer.mainContext.save()
-                        }
-                    }else {
-                        throw Errors.intervalNotFound
-                    }
-                } else {
-                    throw Errors.medicamentoNotFound
-                }
-            } else {
-                throw Errors.fetchUnsuccessful
-            }
-        } catch {
-            dump(error)
-        }
-        
+        SharedInformation.shared.resetScheduleView = true
         completionHandler()
     }
     
-    private func createNotification(nameMedicine: String, dateComponents: DateComponents) {
+    public static func createNotification(nameMedicine: String, dateComponents: DateComponents? = nil, withTimeInvertal: TimeInterval? = nil) {
         let content = UNMutableNotificationContent()
         content.title = NSString.localizedUserNotificationString(forKey: nameMedicine, arguments: nil)
-        content.body = NSString.localizedUserNotificationString(forKey: "Hora de tomar seu remédio!!!", arguments: nil)
+        content.body = NSString.localizedUserNotificationString(forKey: "Hora de tomar seu remédio! Abra o aplicativo para confirmar a dose.", arguments: nil)
         
-        content.sound = UNNotificationSound.defaultCritical
+        content.sound = UNNotificationSound.default
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy HH:mm"
+        content.userInfo = ["Horario da marcacao": "\(dateFormatter.string(from: Date()))"]
         
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-        
-        content.userInfo = ["horaData":"\(dateComponents.day ?? 0)/\(dateComponents.month ?? 0)/\(dateComponents.year ?? 0) - \(dateComponents.hour ?? 0):\(dateComponents.minute ?? 0)"]
+        if let timeInterval = withTimeInvertal {
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: true)
+            NotificationDelegate.registerNotification(content: content, trigger: trigger)
+        }
+        if let components = dateComponents {
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            NotificationDelegate.registerNotification(content: content, trigger: trigger)
+        }
+    }
+    
+    private static func registerNotification(content: UNNotificationContent, trigger: UNNotificationTrigger) {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request) { error in
@@ -181,6 +100,5 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                 dump(error.unsafelyUnwrapped)
             }
         }
-        
     }
 }

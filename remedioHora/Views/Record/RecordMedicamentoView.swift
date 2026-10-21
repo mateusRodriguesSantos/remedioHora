@@ -17,13 +17,14 @@ struct RecordMedicamentoView: View {
     @State private var showImagePicker: Bool = false
     @State private var nome: String = String()
     @State private var dosagem: String = String()
-    @State private var date = Date()
+    @State private var date: Date? = nil
     @State private var quantidadeDias: Int? = nil
     @State private var numberFormatter: NumberFormatter = {
         var nf = NumberFormatter()
         nf.numberStyle = .ordinal
         return nf
     }()
+    @State private var alertValidation: Bool = false
     
     
     var body: some View {
@@ -45,29 +46,42 @@ struct RecordMedicamentoView: View {
                 }
                 .padding(.top, 60)
             }
-            .buttonStyle(.borderless)
+                         .buttonStyle(.borderless)
             Form {
                 Section {
                     TextField("Nome medicamento", text: $nome, prompt: Text("Nome medicamento"))
                     TextField("Dosagem", text: $dosagem, prompt: Text("Dosagem"))
                 }
                 Section {
-                    DatePicker(
-                        "Início",
-                        selection: $date,
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
+//                    HStack {
+//                        Text("Início")
+//                        Spacer()
+//                        DatePicker(
+//                            "",
+//                            selection: Binding(get: {
+//                                date ?? Date()
+//                            }, set: { newValue in
+//                                date = newValue
+//                            }),
+//                            displayedComponents: [.date, .hourAndMinute]
+//                        )
+//                        .opacity(date == nil ? 0.2 : 1)
+//                    }
                     HStack {
                         Text("Quantidade de dias")
-                        TextField("Quantidade de dias", value: $quantidadeDias, format: .number, prompt: Text("Opcional"))
+                        TextField("Quantidade de dias", value: $quantidadeDias, format: .number, prompt: Text("Obrigatório"))
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.numberPad)
                     }
                 }
                 Section {
                     Button {
-                        let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: date, foto: Data(), intervalo: DoseInterval.every15Minutes.label)
-                        manager.navigate(to: .frequency(medicamentoToSave: medicamento))
+                        if nome.isEmpty || dosagem.isEmpty || quantidadeDias == nil {
+                            alertValidation = true
+                        } else {
+                            let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: Date(), foto: Data(), intervalo: DoseInterval.every15Minutes.label)
+                            manager.navigate(to: .frequency(medicamentoToSave: medicamento))
+                        }
                     } label: {
                         Text("Seguinte")
                             .padding(20)
@@ -82,6 +96,13 @@ struct RecordMedicamentoView: View {
                     .listRowBackground(Color.clear)
                 }
             }
+        }
+        .alert("", isPresented: $alertValidation) {
+            Button(role: .confirm) {
+                alertValidation = false
+            }
+        } message: {
+            Text("Preencha todos os campos!")
         }
     }
 }

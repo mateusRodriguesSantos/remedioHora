@@ -9,6 +9,7 @@ import SwiftUI
 
 enum MedicamentosListSteps: Hashable {
     case initialView
+    case detailView(medicamento: Medicamento)
 }
 
 struct MedicamentosListCoordinator: View {
@@ -22,6 +23,8 @@ struct MedicamentosListCoordinator: View {
                     switch destination {
                     case .initialView:
                         MedicamentosListView()
+                    case .detailView(let medicamento):
+                        MedicamentoDetailView(viewModel: MedicamentoDetailViewModel(medicamento: medicamento))
                     }
                 }
         }

@@ -10,6 +10,7 @@ import SwiftData
 
 struct MedicamentosListView: View {
     
+    @EnvironmentObject var manager: MedicamentosListCoordinatorManager
     @Environment(\.modelContext) private var modelContext
     @Query var medicamentos: [Medicamento]
     
@@ -21,9 +22,13 @@ struct MedicamentosListView: View {
                 List {
                     ForEach(Binding.constant(medicamentos), editActions: [.delete]) { medicamento in
                         VStack {
-                            HStack {
-                                Image(systemName: "person")
-                                Text(medicamento.wrappedValue.nome)
+                            Button {
+                                manager.navigate(to: .detailView(medicamento: medicamento.wrappedValue))
+                            } label: {
+                                HStack {
+                                    Image(systemName: "pill.fill")
+                                    Text(medicamento.wrappedValue.nome)
+                                }
                             }
                         }
                     }

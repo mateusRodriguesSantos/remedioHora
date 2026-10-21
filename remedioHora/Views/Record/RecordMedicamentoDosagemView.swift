@@ -75,47 +75,15 @@ struct RecordMedicamentoDosagemView: View {
     
     private func saveNotification(nameMedicine: String, interval: String, date: Date) {
         if let doseEnum = DoseInterval.verify(dose: interval) {
-            let calendar = Calendar(identifier: .gregorian)
-            let initialDateComp = calendar.dateComponents(in: .current, from: date)
-  
-            switch date.compare(Date()) {
-            case .orderedAscending, .orderedSame:
-                let newDate = calendar.date(byAdding: doseEnum.components, to: date)
-                let newDateComp = calendar.dateComponents(in: .current, from: newDate ?? Date())
-                medicamentoToSave.nextDate = newDateComp.date
-                createNotification(nameMedicine: nameMedicine, dateComponents: newDateComp)
-            case .orderedDescending:
-                createNotification(nameMedicine: nameMedicine, dateComponents: initialDateComp)
-            }
-            
+            NotificationDelegate.createNotification(nameMedicine: nameMedicine, withTimeInvertal: TimeInterval(doseEnum.seconds))
+            medicamentoToSave.startTriggerDate = Date()
+            let segundosTreatment = (medicamentoToSave.quantidadeDias * 24) * 60 * 60
+            medicamentoToSave.qtdDoses = segundosTreatment / doseEnum.seconds
             modelContext.insert(medicamentoToSave)
             manager.navigate(to: .confimation)
         } else {
            showAlert = true
         }
-    }
-    
-    private func createNotification(nameMedicine: String, dateComponents: DateComponents) {
-        let content = UNMutableNotificationContent()
-        content.title = NSString.localizedUserNotificationString(forKey: nameMedicine, arguments: nil)
-        content.body = NSString.localizedUserNotificationString(forKey: "Hora de tomar seu remédio!!!", arguments: nil)
-        
-        content.sound = UNNotificationSound.defaultCritical
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-        
-        content.userInfo = ["horaData":"\(dateComponents.day ?? 0)/\(dateComponents.month ?? 0)/\(dateComponents.year ?? 0) - \(dateComponents.hour ?? 0):\(dateComponents.minute ?? 0)"]
-        //content.userInfo = ["horaData":"\(dateComponents.hour ?? 0):\(dateComponents.minute ?? 0)"]
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if error == nil {
-                print("Notification saved!!!")
-            } else {
-                dump(error.unsafelyUnwrapped)
-            }
-        }
-        
     }
 }
 
