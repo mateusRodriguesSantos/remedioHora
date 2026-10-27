@@ -24,11 +24,19 @@ struct MedicamentoDetailView: View {
     var body: some View {
         VStack {
             VStack {
-                Image(systemName: "photo.circle.fill")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .foregroundStyle(Color.black)
-                    .padding()
+                if viewModel.medicamento.foto == nil {
+                    Image(systemName: "photo.circle.fill")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .foregroundStyle(Color.black)
+                        .padding()
+                } else {
+                    viewModel.getPhoto()
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .foregroundStyle(Color.black)
+                        .clipShape(Circle())
+                }
                 Text("\(viewModel.medicamento.nome)")
                     .padding()
             }
@@ -57,7 +65,7 @@ struct MedicamentoDetailView: View {
                     HStack {
                         Text("Doses restantes")
                         Spacer()
-                        Text("\(viewModel.medicamento.qtdDoses ?? 0)")
+                        Text("\(viewModel.medicamento.qtdDoses)")
                             .foregroundStyle(Color.green)
                     }
                 }
@@ -69,11 +77,18 @@ struct MedicamentoDetailView: View {
                             }?.identifier ?? ""
                             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [idNotification])
                             modelContext.delete(viewModel.medicamento)
+                            viewModel.showDeleteAlert = true
+                            manager.reset()
                         }
                     }
                 }
             }
         }
+        .alert("", isPresented: $viewModel.showDeleteAlert) {
+        } message: {
+            Text("Medicamento deletado!")
+        }
+
 //        .toolbar {
 //            ToolbarItem {
 //                Button {

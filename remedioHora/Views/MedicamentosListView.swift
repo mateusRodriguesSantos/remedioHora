@@ -28,8 +28,11 @@ struct MedicamentosListView: View {
                                 HStack {
                                     Image(systemName: "pill.fill")
                                     Text(medicamento.wrappedValue.nome)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
                                 }
                             }
+                            .foregroundStyle(.black)
                         }
                     }
                    // .onDelete(perform: deleteItems)

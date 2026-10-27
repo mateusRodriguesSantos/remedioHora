@@ -79,6 +79,12 @@ struct RecordMedicamentoDosagemView: View {
             medicamentoToSave.startTriggerDate = Date()
             let segundosTreatment = (medicamentoToSave.quantidadeDias * 24) * 60 * 60
             medicamentoToSave.qtdDoses = segundosTreatment / doseEnum.seconds
+            
+            let calendar = Calendar(identifier: .gregorian)
+            let nextDate = calendar.date(byAdding: doseEnum.components, to: medicamentoToSave.startTriggerDate ?? Date()) ?? Date()
+            
+            medicamentoToSave.nextDates = [medicamentoToSave.startTriggerDate ?? Date()]
+            medicamentoToSave.nextDates?.append(nextDate)
             modelContext.insert(medicamentoToSave)
             manager.navigate(to: .confimation)
         } else {

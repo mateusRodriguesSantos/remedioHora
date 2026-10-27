@@ -16,11 +16,11 @@ final class Medicamento {
     var dosagem: String
     var quantidadeDias: Int
     var timestamp: Date
-    var foto: Data
+    var foto: Data? = nil
     var intervalo: String
     var nextDates: [Date]?
     var startTriggerDate: Date?
-    var qtdDoses: Int?
+    var qtdDoses: Int = 0
     
     init(
         id: String = UUID().uuidString,
@@ -28,7 +28,7 @@ final class Medicamento {
         dosagem: String,
         quantidadeDias: Int,
         timestamp: Date,
-        foto: Data,
+        foto: Data? = nil,
         intervalo: String
     ) {
         self.id = id

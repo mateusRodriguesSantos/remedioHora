@@ -14,8 +14,16 @@ class MedicamentoDetailViewModel: ObservableObject {
     let dateFormatter: DateFormatter = DateFormatter()
     @Published var editionMode: Bool = false
     
+    @Published var showDeleteAlert: Bool = false
+    
     init(medicamento: Medicamento) {
         self.medicamento = medicamento
+    }
+    
+    func getPhoto() -> Image {
+        let imageData = medicamento.foto
+        let image = UIImage(data: imageData ?? Data()) ?? UIImage()
+        return Image(uiImage: image)
     }
     
     func formatDateInit() -> String {
