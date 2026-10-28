@@ -71,16 +71,18 @@ class ScheduleViewModel: ObservableObject {
                 let result = try sharedModelContainer.mainContext.fetch(descriptor)
                 if let object = result.first {
                     guard let last = object.hourConfirmations.last else { return false }
-                    let interval = last.timeIntervalSince(Date())
-                    if interval < TimeInterval(seconds) {
+                    let interval = Date().timeIntervalSince(last)
+                    if interval <= TimeInterval(seconds) {
                         return false
                     } else {
                         return true
                     }
+                } else {
+                    return true
                 }
             } catch {
                 dump(error)
-                return false
+                return true
             }
         }
         return false

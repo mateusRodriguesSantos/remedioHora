@@ -15,6 +15,8 @@ struct ScheduleView: View {
    
     @StateObject var viewModel: ScheduleViewModel = ScheduleViewModel()
     
+    @State var update: Int = UUID().hashValue
+    
     var body: some View {
         ZStack {
             VStack {
@@ -33,11 +35,12 @@ struct ScheduleView: View {
                                 viewModel.registryConfirmation(identifier: notification.identifier)
                                 viewModel.showAlertConfirmation = true
                                 viewModel.medicineNameToUpdate = notification.title
+                                update = UUID().hashValue
                             } label: {
                                 VStack(alignment: .leading) {
                                     Text(notification.title)
                                     Text("\(viewModel.getInterval(nomeMedicine: notification.title))")
-                                    if viewModel.isNeedConfirmationIdNotification(identifier: notification.identifier, interval: notification.previsao) {
+                                    if viewModel.isNeedConfirmationIdNotification(identifier: notification.identifier, interval: viewModel.getInterval(nomeMedicine: notification.title)) {
                                         Text("Atrasado")
                                             .padding(8)
                                             .foregroundStyle(Color.white)
@@ -49,7 +52,7 @@ struct ScheduleView: View {
                                 }
                             }
                             .foregroundStyle(.black)
-                            .disabled(!viewModel.isNeedConfirmationIdNotification(identifier: notification.identifier, interval: notification.previsao))
+                            .disabled(viewModel.isNeedConfirmationIdNotification(identifier: notification.identifier, interval: viewModel.getInterval(nomeMedicine: notification.title)) == false)
                         }
                     }
                 }
@@ -58,6 +61,7 @@ struct ScheduleView: View {
                 ProgressView()
             }
         }
+        .id(update)
         .alert("", isPresented: $viewModel.showAlertConfirmation, actions: {
             Button {
                 viewModel.updateMedicineDoses()
@@ -74,12 +78,14 @@ struct ScheduleView: View {
         })
         .task {
             await viewModel.notificationCountability()
+            update = UUID().hashValue
         }
         .onChange(of: sharedInfo.resetScheduleView) {
             Task {
                 if sharedInfo.resetScheduleView {
                     await viewModel.notificationCountability()
                     sharedInfo.resetScheduleView = false
+                    update = UUID().hashValue
                 }
             }
         }

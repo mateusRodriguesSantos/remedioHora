@@ -8,6 +8,7 @@
 import Foundation
 
 enum DoseInterval: CaseIterable, Identifiable {
+    case every1Minutes
     case every15Minutes
     case every30Minutes
     case every1Hour
@@ -27,6 +28,7 @@ enum DoseInterval: CaseIterable, Identifiable {
     
     var label: String {
         switch self {
+        case .every1Minutes: return "A cada 1 minuto"
         case .every15Minutes: return "A cada 15 minutos"
         case .every30Minutes: return "A cada 30 minutos"
         case .every1Hour:     return "A cada 1 hora"
@@ -46,6 +48,7 @@ enum DoseInterval: CaseIterable, Identifiable {
     
     var components: DateComponents {
         switch self {
+        case .every1Minutes: return DateComponents(minute: 1)
         case .every15Minutes: return DateComponents(minute: 15)
         case .every30Minutes: return DateComponents(minute: 30)
         case .every1Hour:     return DateComponents(hour: 1)
@@ -65,6 +68,8 @@ enum DoseInterval: CaseIterable, Identifiable {
     
     var seconds: Int {
         switch self {
+        case .every1Minutes:
+            return 1 * 60
         case .every15Minutes:
             return 15 * 60
         case .every30Minutes:
@@ -107,6 +112,7 @@ enum DoseInterval: CaseIterable, Identifiable {
     
     static var allCases: [DoseInterval] {
         [
+            .every1Minutes,
             .every15Minutes,
             .every30Minutes,
             .every1Hour,
@@ -126,6 +132,8 @@ enum DoseInterval: CaseIterable, Identifiable {
     
     var targetNotificationCount: Int {
             switch self {
+            case .every1Minutes:
+                return 3
             case .every15Minutes, .every30Minutes, .every1Hour, .every2Hours, .every3Hours, .every4Hours, .every6Hours, .every8Hours, .every12Hours:
                 return 20
             case .every24Hours, .every2Days:

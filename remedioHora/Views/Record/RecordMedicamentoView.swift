@@ -4,170 +4,236 @@
 //
 //  Created by Mateus Rodrigues on 17/09/26.
 //
-
 import SwiftUI
 import SwiftData
 import PhotosUI
 
 struct RecordMedicamentoView: View {
-    
+
     @EnvironmentObject var manager: RecordMedicamentoCoordinatorManager
+
+    @State private var toggleState = false
     
-    @State var imageSelection: PhotosPickerItem?
+    @State private var imageSelection: PhotosPickerItem?
     @State private var showImagePicker: Bool
     @State private var nome: String
     @State private var dosagem: String
-    @State private var date: Date? = nil
+    @State private var date: Date?
     @State private var quantidadeDias: Int?
-    @State private var numberFormatter: NumberFormatter = {
-        var nf = NumberFormatter()
-        nf.numberStyle = .ordinal
-        return nf
-    }()
+    @State private var numberFormatter: NumberFormatter
     @State private var alertValidation: Bool
 
-    @FocusState private var focusedField: Bool
-    
+    private enum Campo: Hashable {
+        case nome
+        case dosagem
+        case quantidadeDias
+    }
+
+    @FocusState private var focusedField: Campo?
+
     @State private var imageMedicine: Image?
-    
+    @State private var showErrorFormatImage: Bool
+
     init(
         imageSelection: PhotosPickerItem? = nil,
         showImagePicker: Bool = false,
-        nome: String = String(),
-        dosagem: String = String(),
+        nome: String = "",
+        dosagem: String = "",
         date: Date? = nil,
         quantidadeDias: Int? = nil,
-        numberFormatter: NumberFormatter = NumberFormatter(),
+        numberFormatter: NumberFormatter = {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .ordinal
+            return formatter
+        }(),
         alertValidation: Bool = false,
-        focusedField: Bool = false,
-        imageMedicine: Image? = nil
-        
+        imageMedicine: Image? = nil,
+        showErrorFormatImage: Bool = false
     ) {
-        self.imageSelection = imageSelection
-        self.showImagePicker = showImagePicker
-        self.nome = nome
-        self.dosagem = dosagem
-        self.date = date
-        self.quantidadeDias = quantidadeDias
-        self.numberFormatter = numberFormatter
-        self.alertValidation = alertValidation
-        self.focusedField = focusedField
-        self.imageMedicine = imageMedicine
+        _imageSelection = State(initialValue: imageSelection)
+        _showImagePicker = State(initialValue: showImagePicker)
+        _nome = State(initialValue: nome)
+        _dosagem = State(initialValue: dosagem)
+        _date = State(initialValue: date)
+        _quantidadeDias = State(initialValue: quantidadeDias)
+        _numberFormatter = State(initialValue: numberFormatter)
+        _alertValidation = State(initialValue: alertValidation)
+        _imageMedicine = State(initialValue: imageMedicine)
+        _showErrorFormatImage = State(initialValue: showErrorFormatImage)
     }
-   
+
     var body: some View {
-        VStack {
-            Text("Adicionar Medicamento")
-                .font(.title)
-                .padding(.vertical, 20)
-            
-            PhotosPicker(selection: $imageSelection,
-                         matching: .images,
-                         photoLibrary: .shared()) {
-                VStack {
-                    if imageMedicine == nil {
-                        Image(systemName: "photo.circle.fill")
-                            .resizable()
-                            .frame(width: 100, height: 100)
-                            .foregroundStyle(Color.black)
-                    } else {
-                        imageMedicine.unsafelyUnwrapped
-                            .resizable()
-                            .frame(width: 100, height: 100)
-                            .foregroundStyle(Color.black)
-                            .clipShape(Circle())
-                    }
-                    Text("Foto")
-                        .font(.callout)
-                        .foregroundStyle(Color.secondary)
-                }
-                .padding(.top, 60)
-            }
-            .buttonStyle(.borderless)
-            
-            Form {
-                Section {
-                    TextField("Nome medicamento", text: $nome, prompt: Text("Nome medicamento"))
-                        .focused($focusedField)
-                        .submitLabel(.next)
-                    
-                    TextField("Dosagem", text: $dosagem, prompt: Text("Dosagem"))
-                        .focused($focusedField)
-                        .submitLabel(.next)
-                }
+        NavigationView {
+            VStack {
+                Text("Adicionar Medicamento")
+                    .font(.title)
+                    .padding(.vertical, 20)
                 
-                Section {
-                    HStack {
-                        Text("Quantidade de dias")
-                        TextField("Quantidade de dias", value: $quantidadeDias, format: .number, prompt: Text("Obrigatório"))
-                            .focused($focusedField)
+                PhotosPicker(
+                    selection: $imageSelection,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    VStack {
+                        if let imageMedicine {
+                            imageMedicine
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                        } else {
+                            Image(systemName: "photo.circle.fill")
+                                .resizable()
+                                .frame(width: 100, height: 100)
+                                .foregroundStyle(.black)
+                        }
+                        
+                        Text("Foto")
+                            .font(.callout)
+                            .foregroundStyle(.black)
+                    }
+                    .padding(.top, 60)
+                }
+                .buttonStyle(.borderless)
+                
+                Form {
+                    Section {
+                        TextField(
+                            "Nome medicamento",
+                            text: $nome,
+                            prompt: Text("Nome medicamento")
+                        )
+                        .focused($focusedField, equals: .nome)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .dosagem
+                        }
+                        
+                        TextField(
+                            "Dosagem",
+                            text: $dosagem,
+                            prompt: Text("Dosagem")
+                        )
+                        .focused($focusedField, equals: .dosagem)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .quantidadeDias
+                        }
+                    }
+                    
+                    Section {
+                        HStack {
+                            Text("Quantidade de dias")
+                            
+                            TextField(
+                                "Quantidade de dias",
+                                value: $quantidadeDias,
+                                format: .number,
+                                prompt: Text("Obrigatório")
+                            )
+                            .focused($focusedField, equals: .quantidadeDias)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.numberPad)
-                    }
-                }
-             
-                Section {
-                    Button {
-                        if nome.isEmpty || dosagem.isEmpty || quantidadeDias == nil {
-                            alertValidation = true
-                        } else {
-                            let renderer = ImageRenderer(content: imageMedicine)
-                            
-                            if let uiImage = renderer.uiImage,
-                               let imageData = uiImage.pngData() {
-                                
-                                let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: Date(), foto: imageData, intervalo: DoseInterval.every15Minutes.label)
-                                manager.navigate(to: .frequency(medicamentoToSave: medicamento))
-                            } else {
-                                let medicamento = Medicamento(nome: nome, dosagem: dosagem, quantidadeDias: quantidadeDias ?? 0, timestamp: Date(), foto: nil, intervalo: DoseInterval.every15Minutes.label)
-                                manager.navigate(to: .frequency(medicamentoToSave: medicamento))
-                            }
-                      
                         }
-                    } label: {
-                        Text("Seguinte")
-                            .padding(20)
-                            .foregroundStyle(Color.black)
-                            .background {
-                                RoundedRectangle(cornerRadius: 50, style: .continuous)
-                                    .fill(Color.yellow)
-                            }
-                            .padding(.bottom, 20)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .listRowBackground(Color.clear)
+                    
+                    Section {
+                        Button {
+                            guard !nome.isEmpty,
+                                  !dosagem.isEmpty,
+                                  quantidadeDias != nil else {
+                                alertValidation = true
+                                return
+                            }
+                            
+                            let fotoData: Data?
+                            
+                            if let imageMedicine {
+                                let renderer = ImageRenderer(content: imageMedicine)
+                                fotoData = renderer.uiImage?.pngData()
+                            } else {
+                                fotoData = nil
+                            }
+                            
+                            let medicamento = Medicamento(
+                                nome: nome,
+                                dosagem: dosagem,
+                                quantidadeDias: quantidadeDias ?? 0,
+                                timestamp: Date(),
+                                foto: fotoData,
+                                intervalo: DoseInterval.every15Minutes.label
+                            )
+                            
+                            focusedField = nil
+                            manager.navigate(to: .frequency(medicamentoToSave: medicamento))
+                        } label: {
+                            Text("Seguinte")
+                                .padding(20)
+                                .foregroundStyle(.black)
+                                .background {
+                                    RoundedRectangle(
+                                        cornerRadius: 50,
+                                        style: .continuous
+                                    )
+                                    .fill(.yellow)
+                                }
+                                .padding(.bottom, 20)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .listRowBackground(Color.clear)
+                    }
                 }
-            }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Concluído") {
-                        focusedField = false
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        
+                        Button("Concluído") {
+                            focusedField = nil
+                        }
                     }
                 }
             }
         }
+        .onAppear {
+            imageMedicine = nil
+            nome = ""
+            dosagem = ""
+            quantidadeDias = nil
+        }
         .alert("", isPresented: $alertValidation) {
-            Button(role: .confirm) {
+            Button("OK", role: .confirm) {
                 alertValidation = false
             }
         } message: {
             Text("Preencha todos os campos!")
         }
-        .onChange(of: imageSelection ?? PhotosPickerItem(itemIdentifier: ""), { oldValue, newValue in
-            let _ = loadTransferable(from: newValue)
-        })
+        .alert("", isPresented: $showErrorFormatImage) {
+            Button("OK", role: .confirm) {
+                showErrorFormatImage = false
+            }
+        } message: {
+            Text("Formato de imagem inválido")
+        }
+        .onChange(of: imageSelection) { _, newValue in
+            guard let newValue else { return }
+            _ = loadTransferable(from: newValue)
+        }
     }
-    
-    func loadTransferable(from imageSelection: PhotosPickerItem) -> Progress {
-        return imageSelection.loadTransferable(type: Image.self) { result in
+
+    @discardableResult
+    private func loadTransferable(from selection: PhotosPickerItem) -> Progress {
+        selection.loadTransferable(type: Image.self) { result in
             DispatchQueue.main.async {
-                guard imageSelection == self.imageSelection else { return }
+                guard selection == imageSelection else { return }
+
                 switch result {
                 case .success(let image?):
-                    self.imageMedicine = image
+                    imageMedicine = image
+
                 case .success(nil):
-                    self.imageMedicine = nil
+                    imageMedicine = nil
+                    showErrorFormatImage = true
+
                 case .failure(let error):
                     dump(error)
                 }
