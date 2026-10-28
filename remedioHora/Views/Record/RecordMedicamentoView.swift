@@ -103,11 +103,9 @@ struct RecordMedicamentoView: View {
                             .focused($focusedField)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.numberPad)
-                            
                     }
                 }
              
-                
                 Section {
                     Button {
                         if nome.isEmpty || dosagem.isEmpty || quantidadeDias == nil {

@@ -21,6 +21,7 @@ class SharedInformation: ObservableObject {
 var sharedModelContainer: ModelContainer = {
     let schema = Schema([
         Medicamento.self,
+        ScheduleConfirmations.self
     ])
     let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

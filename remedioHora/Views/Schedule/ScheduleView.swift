@@ -30,13 +30,14 @@ struct ScheduleView: View {
                     List {
                         ForEach(viewModel.notifications, id: \.identifier) { notification in
                             Button {
+                                viewModel.registryConfirmation(identifier: notification.identifier)
                                 viewModel.showAlertConfirmation = true
                                 viewModel.medicineNameToUpdate = notification.title
                             } label: {
                                 VStack(alignment: .leading) {
                                     Text(notification.title)
                                     Text("\(viewModel.getInterval(nomeMedicine: notification.title))")
-                                    if viewModel.isNeedConfirmation(nomeMedicine: notification.title) {
+                                    if viewModel.isNeedConfirmationIdNotification(identifier: notification.identifier, interval: notification.previsao) {
                                         Text("Atrasado")
                                             .padding(8)
                                             .foregroundStyle(Color.white)
@@ -48,7 +49,7 @@ struct ScheduleView: View {
                                 }
                             }
                             .foregroundStyle(.black)
-                            .allowsHitTesting(!viewModel.isNeedConfirmation(nomeMedicine: notification.title))
+                            .disabled(!viewModel.isNeedConfirmationIdNotification(identifier: notification.identifier, interval: notification.previsao))
                         }
                     }
                 }
