@@ -1,0 +1,209 @@
+//
+//  ScheduleViewModel.swift
+//  remedioHora
+//
+//  Created by Mateus Rodrigues on 21/10/26.
+//
+
+import SwiftUI
+import Combine
+import SwiftData
+
+class ScheduleViewModel: ObservableObject {
+    
+    @Published var notifications: [(identifier: String, title: String, previsao: String)] = []
+    @Published var notificationsDelivered: [String] = []
+    @Published var notificationsConfirmed: [Data] = []
+    
+    @Published var showLoading: Bool = false
+    let dateFormatter: DateFormatter = DateFormatter()
+    @Published var showAlertConfirmation: Bool = false
+    @Published var medicineNameToUpdate: String = ""
+    
+    
+    func registryConfirmation(identifier: String) {
+        let descriptor = FetchDescriptor<ScheduleConfirmations>(
+            predicate: #Predicate { $0.idNotification == identifier }
+        )
+        do {
+            let result = try sharedModelContainer.mainContext.fetch(descriptor)
+            if let object = result.first {
+                object.hourConfirmations.append(Date())
+            } else {
+                sharedModelContainer.mainContext.insert(ScheduleConfirmations(id: identifier, hourConfirmations: [Date()]))
+            }
+        } catch {
+            dump(error)
+        }
+    }
+    
+    func updateMedicineDoses() {
+        do {
+            let medicamentos =  try sharedModelContainer.mainContext.fetch(FetchDescriptor<Medicamento>(predicate: #Predicate { medicamento in
+                return medicamento.nome == medicineNameToUpdate
+            }))
+            if let find = medicamentos.first {
+                if let nextDates = find.nextDates {
+                    let doseEnum = DoseInterval.verify(dose: find.intervalo) ?? .every15Minutes
+                    let lastDate = nextDates.last ?? Date()
+                    let calendar = Calendar(identifier: .gregorian)
+                    let newDate = calendar.date(byAdding: doseEnum.components, to: lastDate) ?? Date()
+                    find.nextDates?.append(newDate)
+                    find.qtdDoses -= 1
+                }
+            }
+        } catch {
+            dump(error)
+        }
+    }
+    
+    func isNeedConfirmationIdNotification(identifier: String, interval: String) -> Bool {
+        return notificationsDelivered.contains(where: { $0 == identifier }) && isNeedConfirmationInsideDoseInterval(identifier: identifier, interval: interval)
+    }
+    
+    private func isNeedConfirmationInsideDoseInterval(identifier: String, interval: String) -> Bool {
+        if let doseEnum = DoseInterval.verify(dose: interval) {
+            let seconds = doseEnum.seconds
+            do {
+                let descriptor = FetchDescriptor<ScheduleConfirmations>(
+                    predicate: #Predicate { $0.idNotification == identifier }
+                )
+                let result = try sharedModelContainer.mainContext.fetch(descriptor)
+                if let object = result.first {
+                    guard let last = object.hourConfirmations.last else { return false }
+                    let interval = Date().timeIntervalSince(last)
+                    if interval <= TimeInterval(seconds) {
+                        return false
+                    } else {
+                        return true
+                    }
+                } else {
+                    return true
+                }
+            } catch {
+                dump(error)
+                return true
+            }
+        }
+        return false
+    }
+    
+    func isNeedConfirmation(nomeMedicine: String) -> Bool {
+        do {
+            let medicamentos =  try sharedModelContainer.mainContext.fetch(FetchDescriptor<Medicamento>(predicate: #Predicate { medicamento in
+                return medicamento.nome == nomeMedicine
+            }))
+            if let find = medicamentos.first {
+                return (find.nextDates?.last ?? Date()) <= Date()
+            } else {
+                return false
+            }
+        } catch {
+            dump(error)
+        }
+        return false
+    }
+    
+    func getInterval(nomeMedicine: String) -> String {
+        do {
+            let medicamentos =  try sharedModelContainer.mainContext.fetch(FetchDescriptor<Medicamento>(predicate: #Predicate { medicamento in
+                return medicamento.nome == nomeMedicine
+            }))
+            if let find = medicamentos.first {
+                return find.intervalo
+            } else {
+                return ""
+            }
+        } catch {
+            dump(error)
+        }
+        return ""
+    }
+    
+    func getNextDateTrigger(nomeMedicine: String) -> String {
+        do {
+            let medicamentos =  try sharedModelContainer.mainContext.fetch(FetchDescriptor<Medicamento>(predicate: #Predicate { medicamento in
+                return medicamento.nome == nomeMedicine
+            }))
+            if let find = medicamentos.first {
+                dateFormatter.dateFormat = "dd/MM/yyyy HH:mm"
+                return dateFormatter.string(from: find.nextDates?.last ?? Date())
+            } else {
+                return ""
+            }
+        } catch {
+            dump(error)
+        }
+        return ""
+    }
+    
+    func notificationCountability() async {
+        notificationsConfirmed = []
+        await MainActor.run {
+            showLoading = true
+        }
+        
+        defer {
+            Task { @MainActor in
+                showLoading = false
+            }
+        }
+        
+        let center = UNUserNotificationCenter.current()
+        
+        let delivered = await center.deliveredNotifications()
+        
+        for notification in delivered {
+            print("ENTREGUE")
+            print("ID:", notification.request.identifier)
+            print("Título:", notification.request.content.title)
+            print("Body:", notification.request.content.body)
+            print("Trigger:", notification.request.trigger.debugDescription)
+            notificationsDelivered.append(notification.request.identifier)
+        }
+        
+        let requests = await center.pendingNotificationRequests()
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+        formatter.timeZone = .current
+        
+        var result: [(String, String, previsao: String)] = []
+        
+        for request in requests {
+            guard let trigger = request.trigger
+                    as? UNTimeIntervalNotificationTrigger else {
+                continue
+            }
+            
+            print("ID:", request.identifier)
+            print("Intervalo:", trigger.timeInterval)
+            print("Marcacao:", request.content.userInfo["Horario da marcacao"] ?? "")
+            
+            if let data = trigger.nextTriggerDate() {
+                //let dateString = formatter.string(from: data)
+                
+                print("Previsao \(formatter.string(from: data))")
+                _ = Calendar.current.dateComponents([.day, .month, .year, .hour, .minute, .second], from: Date(), to: data)
+                
+                result.append((
+                    request.identifier,
+                    request.content.title,
+                    previsao: "\(String(describing: trigger.nextTriggerDate()))"
+                ))
+            }
+        }
+        
+        await MainActor.run {
+            notifications = result
+        }
+        
+        // Mantém o loading visível por pelo menos 1 segundo.
+        try? await Task.sleep(for: .seconds(1))
+        
+        await MainActor.run {
+            showLoading = false
+        }
+    }
+    
+}

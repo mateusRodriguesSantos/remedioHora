@@ -8,48 +8,44 @@
 import SwiftUI
 import SwiftData
 
+enum Tabs: Hashable, Equatable {
+    case programacao
+    case medicamentos
+    case gravar
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @Query private var medicamentos: [Medicamento]
+    @State private var showModal: Bool = false
+    @State private var selection: Tabs = .programacao
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        TabView(selection: $selection) {
+            Tab(value: .programacao) {
+                ScheduleCoordinator()
+            } label: {
+                Image(systemName: "list.bullet.clipboard.fill")
+                Text("Programação")
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+            Tab(value: .medicamentos) {
+                MedicamentosListCoordinator()
+            } label: {
+                Image(systemName: "pill.fill")
+                Text("Medicamentos")
             }
-        } detail: {
-            Text("Select an item")
+            Tab(value: .gravar, role: .search) {
+                RecordMedicamentoCoordinator(selectionFromTabBar: $selection)
+            } label: {
+                Image(systemName: "plus.circle.fill")
+            }
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+        .task {
+            let center = UNUserNotificationCenter.current()
+            do {
+                try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            } catch {
+                dump(error)
             }
         }
     }
@@ -57,5 +53,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Medicamento.self, inMemory: true)
 }

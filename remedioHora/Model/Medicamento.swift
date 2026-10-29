@@ -1,0 +1,42 @@
+//
+//  Medicamento.swift
+//  remedioHora
+//
+//  Created by Mateus Rodrigues on 16/09/26.
+//
+
+import Foundation
+import SwiftData
+import UIKit
+
+@Model
+final class Medicamento {
+    var id: String
+    var nome: String
+    var dosagem: String
+    var quantidadeDias: Int
+    var timestamp: Date
+    var foto: Data? = nil
+    var intervalo: String
+    var nextDates: [Date]?
+    var startTriggerDate: Date?
+    var qtdDoses: Int = 0
+    
+    init(
+        id: String = UUID().uuidString,
+        nome: String,
+        dosagem: String,
+        quantidadeDias: Int,
+        timestamp: Date,
+        foto: Data? = nil,
+        intervalo: String
+    ) {
+        self.id = id
+        self.nome = nome
+        self.dosagem = dosagem
+        self.quantidadeDias = quantidadeDias
+        self.timestamp = timestamp
+        self.foto = foto
+        self.intervalo = intervalo
+    }
+}

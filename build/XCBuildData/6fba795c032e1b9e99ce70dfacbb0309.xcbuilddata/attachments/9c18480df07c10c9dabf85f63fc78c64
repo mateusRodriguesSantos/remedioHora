@@ -1,0 +1,31 @@
+{
+  "" : {
+    "const-values" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.swiftconstvalues",
+    "dependencies" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.d",
+    "diagnostics" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.dia",
+    "emit-module-dependencies" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary-emit-module.dia",
+    "pch" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHora-primary.swiftdeps"
+  },
+  "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  },
+  "/Users/mateusrodrigues/Desktop/remedioHora.nosync/remedioHora/ContentView.swift" : {
+    "index-unit-output-path" : "/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/ContentView.o"
+  },
+  "/Users/mateusrodrigues/Desktop/remedioHora.nosync/remedioHora/Repository/Item.swift" : {
+    "index-unit-output-path" : "/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/Item.o",
+    "llvm-bc" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/Item.bc",
+    "object" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/Item.o"
+  },
+  "/Users/mateusrodrigues/Desktop/remedioHora.nosync/remedioHora/remedioHoraApp.swift" : {
+    "index-unit-output-path" : "/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHoraApp.o",
+    "llvm-bc" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHoraApp.bc",
+    "object" : "/Users/mateusrodrigues/Desktop/remedioHora.nosync/build/remedioHora.build/Release-iphoneos/remedioHora.build/Objects-normal/arm64/remedioHoraApp.o"
+  }
+}
